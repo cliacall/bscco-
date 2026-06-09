@@ -1,0 +1,17 @@
+{
+  "source": "cursor_skill",
+  "updated_at": 0,
+  "buys": [
+    {
+      "symbol": "EXAMPLE",
+      "address": "0x0000000000000000000000000000000000000000",
+      "amount_usd": 500,
+      "side": "buy",
+      "maker": "0xwallet1",
+      "is_open_or_close": 0,
+      "timestamp": 0
+    }
+  ],
+  "sells": [],
+  "ai_summary": "由 Cursor GMGN skill 写入，Bot 不持有 GMGN API Key"
+}

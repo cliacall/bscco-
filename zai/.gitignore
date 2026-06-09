@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+*.log
+nohup.out
+data/*.json
+!data/*.example.json
+.DS_Store
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/.agents/

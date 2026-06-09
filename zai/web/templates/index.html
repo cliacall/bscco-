@@ -1,0 +1,2589 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ app_name }} · Neon Demo</title>
+  <style>
+    :root {
+      --bg: #050609;
+      --bg-2: #090b10;
+      --panel: rgba(12, 14, 20, .92);
+      --panel-2: rgba(19, 22, 30, .94);
+      --line: rgba(255, 49, 82, .34);
+      --line-soft: rgba(255, 49, 82, .16);
+      --red: #ff1f4b;
+      --red-2: #ff456b;
+      --red-dark: #8b1028;
+      --cyan: #75e7ff;
+      --green: #31f39a;
+      --amber: #ffc35a;
+      --text: #f6f7fb;
+      --muted: #8f98aa;
+      --dim: #4b5567;
+      --shadow: 0 0 28px rgba(255, 31, 75, .20);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      background:
+        linear-gradient(90deg, rgba(255,31,75,.08) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,31,75,.07) 1px, transparent 1px),
+        radial-gradient(circle at 15% 0%, rgba(255,31,75,.16), transparent 26%),
+        radial-gradient(circle at 88% 8%, rgba(117,231,255,.07), transparent 28%),
+        var(--bg);
+      background-size: 44px 44px, 44px 44px, auto, auto, auto;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(255,255,255,.035) 0,
+        rgba(255,255,255,.035) 1px,
+        transparent 1px,
+        transparent 9px
+      );
+      opacity: .12;
+      mix-blend-mode: screen;
+      z-index: 3;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid rgba(255, 31, 75, .52);
+      border-radius: 6px;
+      padding: 10px 13px;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,31,75,.26), rgba(106,10,28,.58));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 18px rgba(255,31,75,.16);
+      cursor: pointer;
+      font-weight: 760;
+      letter-spacing: 0;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 92, 117, .86);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 0 24px rgba(255,31,75,.26);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      color: #d7dce7;
+      border-color: rgba(255,255,255,.13);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+    }
+
+    button.ghost {
+      border-color: rgba(117, 231, 255, .42);
+      background: rgba(117,231,255,.07);
+      color: #c9f7ff;
+    }
+
+    button.danger {
+      border-color: rgba(255, 31, 75, .95);
+      background: linear-gradient(180deg, rgba(255,31,75,.86), rgba(124,13,36,.86));
+      color: #fff;
+      box-shadow: 0 0 26px rgba(255,31,75,.33);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: wait;
+      transform: none;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      color: var(--text);
+      background: rgba(3, 5, 10, .84);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 6px;
+      outline: 0;
+      padding: 11px 12px;
+      box-shadow: inset 0 0 18px rgba(0,0,0,.34);
+    }
+
+    input:focus {
+      border-color: rgba(255,31,75,.72);
+      box-shadow: 0 0 0 3px rgba(255,31,75,.12), inset 0 0 18px rgba(0,0,0,.34);
+    }
+
+    .scene {
+      position: relative;
+      min-height: 100vh;
+      padding: 18px 18px 32px;
+      overflow: hidden;
+    }
+
+    .scene::before,
+    .scene::after {
+      content: "";
+      position: fixed;
+      top: 74px;
+      bottom: 42px;
+      width: 5px;
+      border-radius: 999px;
+      background: var(--red);
+      box-shadow: 0 0 12px var(--red), 0 0 34px rgba(255,31,75,.72), 0 0 60px rgba(255,31,75,.42);
+      z-index: 1;
+    }
+
+    .scene::before { left: 20px; }
+    .scene::after { right: 20px; }
+
+    .console {
+      position: relative;
+      z-index: 2;
+      max-width: 1480px;
+      margin: 0 auto;
+      border: 1px solid rgba(255,31,75,.52);
+      border-radius: 12px;
+      background:
+        linear-gradient(135deg, rgba(255,31,75,.08), transparent 18%),
+        linear-gradient(315deg, rgba(255,31,75,.08), transparent 18%),
+        rgba(4, 5, 9, .88);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.035) inset,
+        0 0 42px rgba(255,31,75,.18),
+        0 26px 80px rgba(0,0,0,.60);
+      padding: 16px;
+    }
+
+    .console::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(255,31,75,.14);
+      border-radius: 9px;
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: stretch;
+      padding: 8px 8px 16px;
+      border-bottom: 1px solid var(--line-soft);
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      position: relative;
+      min-height: 86px;
+      padding: 12px 14px 12px 18px;
+      border-left: 3px solid var(--red);
+    }
+
+    .kicker {
+      color: var(--red-2);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 6px 0 0;
+      font-size: clamp(28px, 4.6vw, 58px);
+      line-height: .95;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 0 18px rgba(255,31,75,.80), 0 0 52px rgba(255,31,75,.35);
+    }
+
+    .subtitle {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .top-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(130px, 1fr));
+      gap: 9px;
+      align-self: center;
+      min-width: 304px;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      min-height: 98px;
+      padding: 13px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-top-color: rgba(255,31,75,.48);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255,31,75,.11), transparent 44%),
+        rgba(12, 14, 20, .85);
+      box-shadow: inset 0 0 32px rgba(255,31,75,.045);
+      overflow: hidden;
+    }
+
+    .stat-label,
+    .panel-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      margin-top: 8px;
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 18px rgba(255,31,75,.50);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-value.ok { color: var(--green); text-shadow: 0 0 18px rgba(49,243,154,.42); }
+    .stat-value.warn { color: var(--amber); text-shadow: 0 0 18px rgba(255,195,90,.30); }
+
+    .stat-hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .workgrid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, .9fr) minmax(280px, .78fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .panel {
+      position: relative;
+      min-width: 0;
+      border: 1px solid rgba(255,255,255,.10);
+      border-top-color: rgba(255,31,75,.56);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255,31,75,.10), rgba(255,31,75,.02) 28%, transparent),
+        var(--panel);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,.025);
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 18px;
+      right: 18px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,31,75,.92), transparent);
+      opacity: .78;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 48px;
+      padding: 13px 14px 9px;
+      border-bottom: 1px solid rgba(255,31,75,.13);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(255,31,75,.52);
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .span-2 {
+      grid-column: span 2;
+    }
+
+    .radar-panel {
+      min-height: 540px;
+    }
+
+    .radar-stage {
+      position: relative;
+      min-height: 306px;
+      border-bottom: 1px solid rgba(255,31,75,.15);
+      background:
+        linear-gradient(90deg, rgba(255,31,75,.10) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,31,75,.08) 1px, transparent 1px),
+        radial-gradient(circle at 48% 52%, rgba(255,31,75,.15), transparent 42%),
+        rgba(0,0,0,.18);
+      background-size: 42px 42px, 42px 42px, auto, auto;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #radar-canvas {
+      position: absolute;
+      inset: 0;
+    }
+
+    .radar-readouts {
+      position: absolute;
+      inset: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      pointer-events: none;
+      align-content: start;
+    }
+
+    .readout {
+      min-height: 70px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-left-color: rgba(255,31,75,.64);
+      border-radius: 6px;
+      background: rgba(7, 9, 14, .70);
+      backdrop-filter: blur(6px);
+    }
+
+    .readout strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 22px;
+      color: #fff;
+      text-shadow: 0 0 16px rgba(255,31,75,.56);
+    }
+
+    .feed {
+      max-height: 278px;
+      overflow: auto;
+      padding: 12px 14px 14px;
+    }
+
+    .feed::-webkit-scrollbar,
+    .list::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .feed::-webkit-scrollbar-thumb,
+    .list::-webkit-scrollbar-thumb {
+      background: rgba(255,31,75,.45);
+      border-radius: 999px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 70px;
+      padding: 11px 0;
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+
+    .row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .token-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 10px var(--red), 0 0 20px rgba(255,31,75,.55);
+      flex: 0 0 auto;
+    }
+
+    .meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      word-break: break-all;
+    }
+
+    .hot {
+      color: #ffd9e0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: flex-end;
+    }
+
+    .actions button {
+      min-height: 34px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: #d5dbe8;
+      background: rgba(255,255,255,.055);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .pill.red {
+      border-color: rgba(255,31,75,.48);
+      color: #ffd4dc;
+      background: rgba(255,31,75,.12);
+    }
+
+    .grade-a {
+      color: #31f39a;
+      text-shadow: 0 0 14px rgba(49,243,154,.34);
+    }
+
+    .grade-b {
+      color: #ffc35a;
+      text-shadow: 0 0 14px rgba(255,195,90,.30);
+    }
+
+    #mentor-status.red {
+      color: #ff9bad;
+      text-shadow: 0 0 14px rgba(255,31,75,.32);
+    }
+
+    .pill.grade-a {
+      border-color: rgba(49,243,154,.56);
+      color: #c7ffe4;
+      background: rgba(49,243,154,.14);
+      box-shadow: 0 0 14px rgba(49,243,154,.12);
+    }
+
+    .pill.grade-b {
+      border-color: rgba(255,195,90,.58);
+      color: #ffe8b4;
+      background: rgba(255,195,90,.14);
+      box-shadow: 0 0 14px rgba(255,195,90,.10);
+    }
+
+    .pill.cyan {
+      border-color: rgba(117,231,255,.34);
+      color: #c9f7ff;
+      background: rgba(117,231,255,.08);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 126px;
+      gap: 9px;
+      margin-bottom: 10px;
+    }
+
+    .terminal-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .micro {
+      min-height: 76px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 7px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .micro b {
+      display: block;
+      margin-top: 6px;
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .meter {
+      --p: 0;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 5px auto 8px;
+      background:
+        radial-gradient(circle at center, #090b10 0 48%, transparent 50%),
+        conic-gradient(var(--red) calc(var(--p) * 1%), rgba(255,255,255,.08) 0);
+      box-shadow: 0 0 22px rgba(255,31,75,.20);
+    }
+
+    .meter span {
+      font-size: 18px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .list {
+      max-height: 336px;
+      overflow: auto;
+    }
+
+    .message {
+      min-height: 48px;
+      margin-top: 10px;
+      padding: 10px 11px;
+      color: #ffd6de;
+      background: rgba(255,31,75,.08);
+      border: 1px solid rgba(255,31,75,.24);
+      border-radius: 6px;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      font-size: 12px;
+    }
+
+    .message:empty {
+      display: none;
+    }
+
+    .empty {
+      min-height: 88px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      border: 1px dashed rgba(255,255,255,.10);
+      border-radius: 7px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .chart-panel {
+      min-height: 256px;
+    }
+
+    .bar-box {
+      height: 182px;
+      padding: 0 8px 10px;
+    }
+
+    .signal-line {
+      height: 4px;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      box-shadow: 0 0 18px rgba(255,31,75,.55);
+    }
+
+    .mentor-charts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .portrait-card {
+      margin-top: 12px;
+      padding: 11px;
+      border: 1px solid rgba(255,31,75,.25);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255,31,75,.12), transparent 34%),
+        linear-gradient(315deg, rgba(117,231,255,.06), transparent 30%),
+        rgba(3,5,10,.48);
+      box-shadow: inset 0 0 34px rgba(255,31,75,.05);
+    }
+
+    .portrait-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .portrait-toolbar button {
+      min-height: 30px;
+      padding: 6px 9px;
+      font-size: 11px;
+    }
+
+    .portrait-card canvas {
+      height: 330px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 7px;
+      background: #050609;
+    }
+
+    .chart-card {
+      min-height: 218px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 7px;
+      background:
+        linear-gradient(180deg, rgba(255,31,75,.07), transparent 34%),
+        rgba(255,255,255,.03);
+      overflow: hidden;
+    }
+
+    .chart-card canvas {
+      height: 166px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 1180px) {
+      .workgrid {
+        grid-template-columns: minmax(0, 1fr) minmax(320px, .88fr);
+      }
+      .span-2 {
+        grid-column: span 1;
+      }
+      .radar-panel {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .scene {
+        padding: 10px;
+      }
+      .scene::before,
+      .scene::after {
+        display: none;
+      }
+      .console {
+        padding: 10px;
+      }
+      .topbar,
+      .status-strip,
+      .workgrid,
+      .mentor-charts,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .top-actions {
+        min-width: 0;
+        grid-template-columns: 1fr 1fr;
+      }
+      .radar-readouts {
+        grid-template-columns: 1fr;
+      }
+      .radar-stage {
+        min-height: 360px;
+      }
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .actions {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <main class="console">
+      <header class="topbar">
+        <div class="brand">
+          <div class="kicker">BSCCO / FOUR.MEME / BSC PRIMARY MARKET</div>
+          <h1>{{ app_name }}</h1>
+          <div class="subtitle">新创建检测 · Cobo 手机确认 · AI 决策 · 持仓卖出</div>
+        </div>
+        <div class="top-actions">
+          <button class="secondary" id="refresh-wallet">刷新余额</button>
+          <button class="secondary" id="refresh-all">同步全部</button>
+          <button class="danger" id="scan-now">扫描新创建</button>
+          <button class="danger" id="ai-toggle-top">启动 AI 机器人</button>
+          <button class="ghost" id="ai-test">AI 决策一次</button>
+        </div>
+      </header>
+
+      <section class="status-strip">
+        <div class="stat">
+          <div class="stat-label">钱包余额</div>
+          <div class="stat-value" id="stat-balance">--</div>
+          <div class="stat-hint" id="stat-wallet">读取中</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">four 新创建</div>
+          <div class="stat-value" id="stat-new">0</div>
+          <div class="stat-hint" id="stat-pools">等待扫描</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">持仓 / Pact</div>
+          <div class="stat-value" id="stat-pos">0</div>
+          <div class="stat-hint" id="stat-pact">Cobo Pact --</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">合约 / 智能</div>
+          <div class="stat-value" id="stat-runtime">--</div>
+          <div class="stat-hint" id="stat-ai">caw -- · 智能 --</div>
+        </div>
+      </section>
+
+      <section class="workgrid">
+        <section class="panel radar-panel span-2">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Live Launch Radar</div>
+              <h2 class="panel-title">新创建雷达</h2>
+            </div>
+            <button class="secondary" id="load-pools">刷新列表</button>
+          </div>
+          <div class="radar-stage">
+            <canvas id="radar-canvas"></canvas>
+            <div class="radar-readouts">
+              <div class="readout">
+                <div class="panel-label">候选池</div>
+                <strong id="readout-total">0</strong>
+                <div class="meta">four.meme + history</div>
+              </div>
+              <div class="readout">
+                <div class="panel-label">最高评分</div>
+                <strong id="readout-score">--</strong>
+                <div class="meta" id="readout-symbol">等待数据</div>
+              </div>
+              <div class="readout">
+                <div class="panel-label">扫描状态</div>
+                <strong id="new-status">IDLE</strong>
+                <div class="meta">Python FastAPI</div>
+              </div>
+            </div>
+          </div>
+          <div class="feed" id="new-list">
+            <div class="empty">加载中...</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Trade Terminal</div>
+              <h2 class="panel-title">交易 / 评分</h2>
+            </div>
+            <span class="pill red">Cobo 手机确认</span>
+          </div>
+          <div class="panel-body terminal-stack">
+            <div class="form-grid">
+              <input id="trade-address" placeholder="合约 0x..." autocomplete="off" />
+              <input id="trade-amount" type="number" min="0.0001" step="0.001" value="0.001" />
+            </div>
+            <button class="danger" id="manual-buy">买入，手机确认</button>
+            <button id="force-buy">强制测试买入</button>
+            <button class="secondary" id="score-token">评分</button>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">默认单笔</div>
+                <b>0.001 BNB</b>
+                <div class="meta">AI 会按余额重新计算</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">授权状态</div>
+                <b id="trade-pact">--</b>
+                <div class="meta">批准后再次点击买入</div>
+              </div>
+            </div>
+            <div class="message" id="trade-msg"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Score Matrix</div>
+              <h2 class="panel-title">评分结果</h2>
+            </div>
+            <div class="meter" id="score-meter" style="--p:0"><span id="score-meter-text">--</span></div>
+          </div>
+          <div class="panel-body" id="score-box">
+            <div class="empty">输入 CA 后点击评分</div>
+          </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Portfolio Control</div>
+              <h2 class="panel-title">持仓 / 手动卖出</h2>
+            </div>
+            <button class="secondary" id="refresh-positions">刷新持仓</button>
+          </div>
+          <div class="panel-body">
+            <div class="list" id="position-list">
+              <div class="empty">加载中...</div>
+            </div>
+            <div class="message" id="sell-msg"></div>
+          </div>
+        </section>
+
+        <section class="panel chart-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Signal Bars</div>
+              <h2 class="panel-title">新币脉冲</h2>
+            </div>
+            <span class="pill cyan" id="pulse-label">SYNC</span>
+          </div>
+          <div class="bar-box">
+            <canvas id="bar-canvas"></canvas>
+          </div>
+          <div class="signal-line"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">AI Decision</div>
+              <h2 class="panel-title">AI 测试</h2>
+            </div>
+            <span class="pill cyan" id="ai-status">OFF</span>
+          </div>
+          <div class="panel-body">
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">AI 建议本笔</div>
+                <b id="ai-amount">--</b>
+                <div class="meta" id="ai-balance">等待余额</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">最近动作</div>
+                <b id="ai-action">--</b>
+                <div class="meta" id="ai-confidence">等待决策</div>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <button class="danger" id="ai-toggle-side">启动 AI 机器人</button>
+              <button class="ghost" id="ai-cycle">运行 AI 一轮</button>
+            </div>
+            <div class="meta" id="ai-loop-meta" style="margin-top:10px">循环未启动</div>
+            <button class="secondary" id="ai-test-side" style="width:100%; margin-top:10px">强制决策一次</button>
+            <div class="message" id="ai-msg"></div>
+            <div class="list" id="ai-list" style="margin-top:12px">
+              <div class="empty">等待 AI 决策</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Learning Board</div>
+              <h2 class="panel-title">AI 学习板块</h2>
+            </div>
+            <button class="secondary" id="refresh-learning">刷新学习</button>
+          </div>
+          <div class="panel-body">
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">上次学习</div>
+                <b id="learning-last">--</b>
+                <div class="meta" id="learning-runtime">规则检查 --</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">AI 模式</div>
+                <b id="learning-mode">--</b>
+                <div class="meta" id="learning-next">等待下一轮</div>
+              </div>
+            </div>
+            <div class="message" id="learning-insight"></div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">学到的规则</div>
+                <div id="learning-rules" class="meta">--</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">回避模式</div>
+                <div id="learning-avoid" class="meta">--</div>
+              </div>
+            </div>
+            <div class="list" id="learning-trades" style="margin-top:12px">
+              <div class="empty">暂无学习记录</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">GMGN Auto Mentor</div>
+              <h2 class="panel-title">GMGN 聪明钱自动学习</h2>
+            </div>
+            <button class="secondary" id="refresh-gmgn-learning">刷新 GMGN</button>
+          </div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <input id="gmgn-learning-limit" type="number" min="1" max="30" step="1" value="10" placeholder="批量学习数量 1-30" />
+              <button class="danger" id="gmgn-learning-run">批量深挖学习</button>
+            </div>
+            <div class="mini-grid">
+              <button class="secondary" id="gmgn-learning-toggle">启动 GMGN 自动循环</button>
+              <button class="ghost" id="gmgn-learning-detect">刷新检测</button>
+            </div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">检测候选</div>
+                <b id="gmgn-learning-detected">--</b>
+                <div class="meta" id="gmgn-learning-market">内盘币 --</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">本地学习</div>
+                <b id="gmgn-learning-learned">--</b>
+                <div class="meta" id="gmgn-learning-last-count">本轮 --</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">自动状态</div>
+                <b id="gmgn-learning-status">--</b>
+                <div class="meta" id="gmgn-learning-next">等待启动</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">通道</div>
+                <b id="gmgn-learning-ready">--</b>
+                <div class="meta" id="gmgn-learning-source">排行 / 内盘 / 聪明钱</div>
+              </div>
+            </div>
+            <div class="message" id="gmgn-learning-msg"></div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">GMGN 候选钱包</div>
+                <div class="list" id="gmgn-candidate-list" style="margin-top:8px">
+                  <div class="empty">等待 GMGN 数据</div>
+                </div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">本地画像记忆</div>
+                <div class="list" id="gmgn-learned-list" style="margin-top:8px">
+                  <div class="empty">等待 AI 深挖</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-head">
+            <div>
+              <div class="panel-label">Mentor Wallet Training</div>
+              <h2 class="panel-title">模板钱包学习</h2>
+            </div>
+            <button class="secondary" id="refresh-mentor">刷新导师数据</button>
+          </div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <input id="mentor-wallet" placeholder="导师钱包 0x..." value="" autocomplete="off" />
+              <button class="danger" id="mentor-deep-dive">深挖</button>
+            </div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">导师钱包</div>
+                <b id="mentor-wallet-label">--</b>
+                <div class="meta" id="mentor-updated">等待数据</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">数据通道</div>
+                <b id="mentor-status">--</b>
+                <div class="meta" id="mentor-ready">GMGN -- · AI --</div>
+              </div>
+            </div>
+            <div class="message" id="mentor-instruction"></div>
+            <div class="portrait-card">
+              <div class="portrait-toolbar">
+                <div class="panel-label">动物棱形画像</div>
+                <button class="secondary" id="export-mentor-image">导出 PNG</button>
+              </div>
+              <canvas id="mentor-profile-image"></canvas>
+            </div>
+            <div class="mentor-charts">
+              <div class="chart-card">
+                <div class="panel-label">动物节奏</div>
+                <canvas id="mentor-activity-chart"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="panel-label">猎食收益</div>
+                <canvas id="mentor-profit-chart"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="panel-label">风格棱镜</div>
+                <canvas id="mentor-rule-chart"></canvas>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">打法画像</div>
+                <b id="mentor-style">--</b>
+                <div class="meta" id="mentor-confidence">confidence --</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">活跃摘要</div>
+                <b id="mentor-activity">--</b>
+                <div class="meta" id="mentor-top-symbols">--</div>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">入场 / 复制规则</div>
+                <div id="mentor-entry" class="meta">--</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">出场 / 仓位规则</div>
+                <div id="mentor-exit" class="meta">--</div>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <div class="micro">
+                <div class="panel-label">筛选条件</div>
+                <div id="mentor-filters" class="meta">--</div>
+              </div>
+              <div class="micro">
+                <div class="panel-label">回避 / 红旗</div>
+                <div id="mentor-avoid" class="meta">--</div>
+              </div>
+            </div>
+            <div class="list" id="mentor-history" style="margin-top:12px">
+              <div class="empty">还没有导师钱包画像；点击“深挖”。</div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    let poolsCache = [];
+    let positionsCache = [];
+    let busy = new Set();
+    let positionRefreshTimer = null;
+    let mentorChartState = null;
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function short(addr) {
+      const s = String(addr || "");
+      return s.length > 14 ? `${s.slice(0, 8)}...${s.slice(-6)}` : s;
+    }
+
+    function validAddress(addr) {
+      return /^0x[a-fA-F0-9]{40}$/.test(String(addr || "").trim());
+    }
+
+    function fmtTime(ts) {
+      const n = Number(ts || 0);
+      if (!n) return "--";
+      return new Date(n * 1000).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+
+    function setMsg(selector, text) {
+      $(selector).textContent = text || "";
+    }
+
+    function setBusy(key, on) {
+      if (on) busy.add(key);
+      else busy.delete(key);
+      const map = {
+        wallet: ["#refresh-wallet"],
+        all: ["#refresh-all"],
+        scan: ["#scan-now"],
+        pools: ["#load-pools"],
+        buy: ["#manual-buy", "#force-buy"],
+        score: ["#score-token"],
+        ai: ["#ai-test", "#ai-test-side"],
+        aiControl: ["#ai-toggle-top", "#ai-toggle-side", "#ai-cycle"],
+        learning: ["#refresh-learning"],
+        gmgnLearning: ["#refresh-gmgn-learning", "#gmgn-learning-toggle", "#gmgn-learning-run", "#gmgn-learning-detect", "#gmgn-learning-limit", ".js-gmgn-candidate-dive"],
+        mentor: ["#refresh-mentor", "#mentor-deep-dive"],
+        positions: ["#refresh-positions"],
+      };
+      (map[key] || []).forEach((selector) => {
+        $$(selector).forEach((el) => {
+          if (el) el.disabled = on;
+        });
+      });
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, options);
+      const text = await res.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+      if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function stageLabel(stage) {
+      const labels = {
+        new_creation: "新创建",
+        near_completion: "即将毕业",
+        graduated: "已射出",
+        hot: "热门",
+        smartmoney: "聪明钱",
+      };
+      return labels[stage] || stage || "未知";
+    }
+
+    function poolAddress(pool) {
+      return pool.address || pool.token_address || "";
+    }
+
+    function fillTrade(address, amount = "0.001") {
+      $("#trade-address").value = address || "";
+      $("#trade-amount").value = amount;
+      $("#trade-address").focus();
+      $("#trade-address").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function renderPools(items) {
+      poolsCache = Array.isArray(items) ? items : [];
+      const newCount = poolsCache.filter((p) => (p.stage || "new_creation") === "new_creation").length;
+      const best = poolsCache.reduce((top, p) => (Number(p.score || 0) > Number(top?.score || 0) ? p : top), null);
+      $("#stat-new").textContent = String(newCount);
+      $("#stat-pools").textContent = `共 ${poolsCache.length} 个候选`;
+      $("#readout-total").textContent = String(poolsCache.length);
+      $("#readout-score").textContent = best?.score != null ? String(best.score) : "--";
+      $("#readout-symbol").textContent = best?.symbol ? `${best.symbol} · ${stageLabel(best.stage)}` : "等待数据";
+      $("#pulse-label").textContent = poolsCache.length ? `${poolsCache.length} SIGNALS` : "SYNC";
+
+      if (!poolsCache.length) {
+        $("#new-list").innerHTML = '<div class="empty">暂无数据，点击“扫描新创建”。</div>';
+        drawBars();
+        return;
+      }
+
+      $("#new-list").innerHTML = poolsCache.slice(0, 32).map((pool) => {
+        const addr = poolAddress(pool);
+        const symbol = escapeHtml(pool.symbol || "?");
+        const stage = escapeHtml(stageLabel(pool.stage));
+        const score = pool.score != null ? `<span class="pill red">分 ${escapeHtml(pool.score)}</span>` : "";
+        const volume = escapeHtml(pool.volume_fmt || pool.volume || "--");
+        const liq = escapeHtml(pool.liquidity_fmt || pool.liquidity || "--");
+        const reason = pool.scout_reason ? `<div class="meta hot">${escapeHtml(pool.scout_reason)}</div>` : "";
+        return `
+          <div class="row">
+            <div>
+              <div class="name"><span class="token-dot"></span><span>${symbol}</span><span class="pill">${stage}</span>${score}</div>
+              <div class="meta">量 ${volume} · 池 ${liq} · ${escapeHtml(short(addr))}</div>
+              ${reason}
+            </div>
+            <div class="actions">
+              <button class="secondary js-fill" data-address="${escapeHtml(addr)}">填入</button>
+              <button class="danger js-buy-fill" data-address="${escapeHtml(addr)}">买入</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+      drawBars();
+    }
+
+    function renderPositions(items) {
+      positionsCache = Array.isArray(items) ? items : [];
+      $("#stat-pos").textContent = String(positionsCache.length);
+      if (!positionsCache.length) {
+        $("#position-list").innerHTML = '<div class="empty">暂无持仓或确认中的买入</div>';
+        return;
+      }
+
+      $("#position-list").innerHTML = positionsCache.map((p) => {
+        const gain = p.current_gain_pct != null ? `${escapeHtml(p.current_gain_pct)}%` : "--";
+        const status = escapeHtml(p.status || "open");
+        const addr = escapeHtml(p.address || "");
+        return `
+          <div class="row">
+            <div>
+              <div class="name"><span class="token-dot"></span><span>${escapeHtml(p.symbol || "?")}</span><span class="pill">${status}</span><span class="pill red">${gain}</span></div>
+              <div class="meta">${escapeHtml(short(p.address))} · 买入 ${escapeHtml(p.amount_bnb || 0)} BNB ${p.token_amount ? `· 持 ${escapeHtml(p.token_amount)}` : ""}</div>
+            </div>
+            <div class="actions">
+              <button class="secondary js-sell" data-address="${addr}" data-pct="25">卖 25%</button>
+              <button class="secondary js-sell" data-address="${addr}" data-pct="50">卖 50%</button>
+              <button class="danger js-sell" data-address="${addr}" data-pct="100">清仓</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderScore(data) {
+      const d = data || {};
+      const score = Number(d.score || 0);
+      $("#score-meter").style.setProperty("--p", Math.max(0, Math.min(100, score)));
+      $("#score-meter-text").textContent = d.score != null ? String(d.score) : "--";
+      $("#score-box").innerHTML = `
+        <div class="name"><span class="token-dot"></span><span>${escapeHtml(d.symbol || "?")}</span><span class="pill red">${escapeHtml(d.signal || "--")}</span></div>
+        <div class="mini-grid">
+          <div class="micro"><div class="panel-label">策略</div><b>${escapeHtml(d.strategy || d.top_agent?.strategy || "--")}</b><div class="meta">threshold ${escapeHtml(d.buy_threshold || "--")}</div></div>
+          <div class="micro"><div class="panel-label">风险</div><b>${escapeHtml(d.risk_level || "--")}</b><div class="meta">price ${escapeHtml(d.price_fmt || "--")}</div></div>
+        </div>
+        <div class="meta">${escapeHtml(d.address || "")}</div>
+        ${(d.risk_flags || []).slice(0, 8).map((x) => `<div class="meta hot">${escapeHtml(x)}</div>`).join("")}
+      `;
+    }
+
+    function renderAiState(data) {
+      const list = Array.isArray(data?.decisions) ? data.decisions : [];
+      const latest = list[0] || {};
+      const enabled = Boolean(data?.enabled);
+      const autoTrade = data?.auto_trade !== false;
+      $("#ai-status").textContent = enabled ? "RUNNING" : "OFF";
+      $("#ai-status").className = `pill ${enabled ? "red" : "cyan"}`;
+      $("#ai-toggle-top").textContent = enabled ? "停止 AI 机器人" : "启动 AI 机器人";
+      $("#ai-toggle-side").textContent = enabled ? "停止 AI 机器人" : "启动 AI 机器人";
+      $("#ai-loop-meta").textContent = enabled
+        ? `自动开单 ${autoTrade ? "ON" : "OFF"} · 上轮 ${fmtTime(data.last_run)} · 下轮 ${data.next_run_in ?? "--"}s`
+        : "循环未启动";
+      $("#ai-action").textContent = latest.action || "--";
+      $("#ai-confidence").textContent = latest.confidence ? `confidence ${latest.confidence}` : "等待决策";
+      $("#ai-amount").textContent = latest.amount_bnb != null ? `${latest.amount_bnb} BNB` : data?.last_sizing?.suggested_bnb != null ? `${data.last_sizing.suggested_bnb} BNB` : "--";
+      $("#ai-balance").textContent = latest.sizing?.balance_bnb != null ? `余额 ${latest.sizing.balance_bnb} BNB` : data?.last_sizing?.balance_bnb != null ? `余额 ${data.last_sizing.balance_bnb} BNB` : "等待余额";
+
+      if (!list.length) {
+        $("#ai-list").innerHTML = '<div class="empty">等待 AI 决策</div>';
+        return;
+      }
+
+      $("#ai-list").innerHTML = list.slice(0, 8).map((d) => `
+        <div class="row">
+          <div>
+            <div class="name"><span class="token-dot"></span><span>${escapeHtml(d.symbol || "?")}</span><span class="pill red">${escapeHtml(d.action || "hold")}</span><span class="pill">${escapeHtml(d.confidence || "--")}</span></div>
+            <div class="meta">本笔 ${escapeHtml(d.amount_bnb ?? "--")} BNB · 余额 ${escapeHtml(d.sizing?.balance_bnb ?? "--")} BNB · ${escapeHtml(stageLabel(d.stage))}</div>
+            <div class="meta hot">${escapeHtml(d.reason || "")}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderLearning(data) {
+      const d = data || {};
+      const learning = d.learning || {};
+      const ai = d.ai || {};
+      const runtimeOk = d.runtime?.ok;
+      const rules = Array.isArray(learning.rules) ? learning.rules : [];
+      const avoid = Array.isArray(learning.avoid) ? learning.avoid : [];
+      const closed = Array.isArray(d.recent_closed) ? d.recent_closed : [];
+      const daybook = Array.isArray(d.daybook) ? d.daybook : [];
+      $("#learning-last").textContent = fmtTime(ai.last_learning_run || ai.last_run);
+      $("#learning-runtime").textContent = runtimeOk ? "规则检查 OK" : `规则检查 ${runtimeOk === false ? "ERR" : "--"}`;
+      $("#learning-mode").textContent = ai.enabled ? (ai.auto_trade === false ? "学习" : "学习+开单") : "未启动";
+      $("#learning-next").textContent = ai.enabled ? `下轮 ${ai.next_run_in ?? "--"}s · 仓位 ${ai.open_positions ?? 0}` : "等待启动";
+      setMsg("#learning-insight", learning.last_insight || "等待 AI 复盘产生新洞察");
+      $("#learning-rules").innerHTML = rules.length
+        ? rules.slice(0, 8).map((x, i) => `${i + 1}. ${escapeHtml(x)}`).join("<br>")
+        : "--";
+      $("#learning-avoid").innerHTML = avoid.length
+        ? avoid.slice(0, 8).map((x, i) => `${i + 1}. ${escapeHtml(x)}`).join("<br>")
+        : "--";
+      const rows = [...daybook, ...closed].slice(0, 8);
+      if (!rows.length) {
+        $("#learning-trades").innerHTML = '<div class="empty">暂无平仓复盘；开平仓后这里会出现学习记录</div>';
+        return;
+      }
+      $("#learning-trades").innerHTML = rows.map((t) => `
+        <div class="row">
+          <div>
+            <div class="name"><span class="token-dot"></span><span>${escapeHtml(t.symbol || "?")}</span><span class="pill red">${escapeHtml(t.outcome || t.close_type || "learn")}</span></div>
+            <div class="meta">${escapeHtml(t.reflection || t.reason || t.lesson || "--")}</div>
+            ${t.next_rule ? `<div class="meta hot">下条规则: ${escapeHtml(t.next_rule)}</div>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderGmgnLearning(data) {
+      const state = data || {};
+      const enabled = Boolean(state.enabled);
+      const running = Boolean(state.running);
+      const candidates = Array.isArray(state.candidates) ? state.candidates : [];
+      const learned = Array.isArray(state.learned) ? state.learned : [];
+      const marketTokens = Array.isArray(state.market_tokens) ? state.market_tokens : [];
+      const detectedTotal = Number(state.detected_total ?? candidates.length);
+      const marketTotal = Number(state.market_token_total ?? marketTokens.length);
+      const learnedTotal = Number(state.learned_total ?? learned.length);
+      const lastLearned = Number(state.last_learned_count ?? 0);
+      const requestedLearn = Math.max(1, Math.min(30, Number(state.requested_learn_count ?? state.deep_limit ?? 10)));
+      const summary = state.source_summary || {};
+      const summaryText = Object.entries(summary)
+        .filter(([, value]) => Number(value) > 0)
+        .map(([key, value]) => `${key.replaceAll("_", " ")} ${value}`)
+        .join(" · ");
+
+      const limitInput = $("#gmgn-learning-limit");
+      if (limitInput && document.activeElement !== limitInput) limitInput.value = String(requestedLearn);
+      $("#gmgn-learning-detected").textContent = Number.isFinite(detectedTotal) ? `${detectedTotal} 个` : "--";
+      $("#gmgn-learning-market").textContent = `内盘/排行币 ${Number.isFinite(marketTotal) ? marketTotal : marketTokens.length} 个`;
+      $("#gmgn-learning-learned").textContent = Number.isFinite(learnedTotal) ? `${learnedTotal} 个` : "--";
+      $("#gmgn-learning-last-count").textContent = `上轮 ${Number.isFinite(lastLearned) ? lastLearned : 0} 个 · 本次计划 ${requestedLearn} 个`;
+      $("#gmgn-learning-status").textContent = running ? "RUNNING" : enabled ? "AUTO ON" : "OFF";
+      $("#gmgn-learning-toggle").textContent = enabled ? "停止 GMGN 学习" : "启动 GMGN 学习";
+      $("#gmgn-learning-next").textContent = enabled
+        ? `下轮 ${state.next_run_in ?? "--"}s · 每轮最多 ${requestedLearn} 钱包`
+        : "等待启动";
+      const learningAiProvider = state.ai_provider || "ZAI";
+      $("#gmgn-learning-ready").textContent = `GMGN ${state.gmgn_ready ? "OK" : "--"} · ${learningAiProvider} ${state.deepseek_ready ? "OK" : "--"}`;
+      $("#gmgn-learning-source").textContent = summaryText || `内盘币 ${marketTotal} · 候选 ${detectedTotal}`;
+      const error = Array.isArray(state.errors) && state.errors.length ? `\n最近错误: ${state.errors[0].message || "--"}` : "";
+      setMsg("#gmgn-learning-msg", `${state.last_message || "等待 GMGN 自动学习"}${error}`);
+
+      if (!candidates.length) {
+        $("#gmgn-candidate-list").innerHTML = '<div class="empty">还没有候选钱包；先点“刷新检测”。</div>';
+      } else {
+        $("#gmgn-candidate-list").innerHTML = candidates.slice(0, 8).map((item) => {
+          const sources = Array.isArray(item.sources) ? item.sources.join(" / ") : item.source || "gmgn";
+          const tags = Array.isArray(item.tags) && item.tags.length ? item.tags.slice(0, 4).join(" · ") : "smartmoney";
+          const symbols = Array.isArray(item.symbols) && item.symbols.length ? item.symbols.slice(0, 4).join(" · ") : "--";
+          return `
+            <div class="row">
+              <div>
+                <div class="name"><span class="token-dot"></span><span>${escapeHtml(short(item.wallet))}</span><span class="pill red">score ${escapeHtml(item.score ?? "--")}</span></div>
+                <div class="meta">${escapeHtml(sources)} · ${escapeHtml(tags)}</div>
+                <div class="meta hot">${escapeHtml(symbols)} · buy $${escapeHtml(compactNum(item.buy_usd || 0))} · ${escapeHtml(item.reason || "")}</div>
+              </div>
+              <button class="danger js-gmgn-candidate-dive" data-wallet="${escapeHtml(item.wallet)}">深挖</button>
+            </div>
+          `;
+        }).join("");
+      }
+
+      if (!learned.length) {
+        $("#gmgn-learned-list").innerHTML = '<div class="empty">还没有本地画像记忆；填写数量后点“批量深挖学习”。</div>';
+        return;
+      }
+      $("#gmgn-learned-list").innerHTML = learned.slice(0, 8).map((item) => `
+        <div class="row">
+          <div>
+            <div class="name"><span class="token-dot"></span><span>${escapeHtml(short(item.wallet))}</span><span class="pill ${gradeClass(item.grade)}">${escapeHtml(item.grade || "unknown")}</span><span class="pill">${escapeHtml(item.confidence || "--")}</span></div>
+            <div class="meta">${escapeHtml(item.style || item.reason || "--")}</div>
+            <div class="meta hot">候选分 ${escapeHtml(item.candidate_score ?? "--")} · ${escapeHtml(fmtTime(item.updated_at))}</div>
+          </div>
+          <button class="secondary js-mentor-fill" data-wallet="${escapeHtml(item.wallet)}">查看</button>
+        </div>
+      `).join("");
+    }
+
+    function renderLineList(items, limit = 8) {
+      const list = Array.isArray(items) ? items.filter(Boolean) : [];
+      if (!list.length) return "--";
+      return list.slice(0, limit).map((x, i) => `${i + 1}. ${escapeHtml(x)}`).join("<br>");
+    }
+
+    function gradeClass(grade) {
+      const g = String(grade || "").trim().toUpperCase();
+      if (g === "A") return "grade-a";
+      if (g === "B") return "grade-b";
+      if (g === "C" || g === "D" || g === "ERROR") return "red";
+      return "";
+    }
+
+    function n(value, fallback = 0) {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : fallback;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.lineTo(x + w - rr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+      ctx.lineTo(x + w, y + h - rr);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+      ctx.lineTo(x + rr, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+      ctx.lineTo(x, y + rr);
+      ctx.quadraticCurveTo(x, y, x + rr, y);
+      ctx.closePath();
+    }
+
+    function drawChartBackground(ctx, width, height) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "rgba(3,5,10,.35)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "rgba(255,31,75,.10)";
+      ctx.lineWidth = 1;
+      for (let y = 18; y < height; y += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+    }
+
+    function compactNum(value) {
+      const v = n(value);
+      const abs = Math.abs(v);
+      if (abs >= 1000000) return `${(v / 1000000).toFixed(1)}m`;
+      if (abs >= 1000) return `${(v / 1000).toFixed(1)}k`;
+      if (abs >= 100) return v.toFixed(0);
+      if (abs >= 10) return v.toFixed(1);
+      return v.toFixed(2);
+    }
+
+    function drawPortraitTile(ctx, x, y, w, h, label, value, accent = "#ff456b") {
+      roundRect(ctx, x, y, w, h, 8);
+      ctx.fillStyle = "rgba(255,255,255,.045)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.10)";
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.58)";
+      ctx.font = "800 10px Inter, sans-serif";
+      ctx.fillText(label, x + 11, y + 18);
+      ctx.fillStyle = accent;
+      ctx.font = "900 20px Inter, sans-serif";
+      ctx.fillText(value, x + 11, y + 44);
+    }
+
+    function drawPortraitBar(ctx, x, y, w, label, value, color) {
+      const pct = Math.max(0, Math.min(1, n(value) / 100));
+      ctx.fillStyle = "rgba(255,255,255,.08)";
+      roundRect(ctx, x, y + 18, w, 8, 4);
+      ctx.fill();
+      ctx.fillStyle = color;
+      roundRect(ctx, x, y + 18, Math.max(6, w * pct), 8, 4);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.74)";
+      ctx.font = "800 10px Inter, sans-serif";
+      ctx.fillText(label, x, y + 10);
+      ctx.fillStyle = "#f6f7fb";
+      ctx.fillText(`${Math.round(pct * 100)}%`, x + w - 28, y + 10);
+    }
+
+    function poly(ctx, points, fill, stroke = "rgba(255,255,255,.16)", lineWidth = 1) {
+      if (!points.length) return;
+      ctx.beginPath();
+      ctx.moveTo(points[0][0], points[0][1]);
+      points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+    }
+
+    function walletAnimalProfile(analysis, raw) {
+      const s7 = raw.stats_7d || {};
+      const s30 = raw.stats_30d || {};
+      const pnl = s30.pnl_stat || s7.pnl_stat || {};
+      const summary = raw.activity_summary || {};
+      const text = JSON.stringify(analysis || {}, null, 0).toLowerCase();
+      const buy = n(summary.buy_count);
+      const sell = n(summary.sell_count);
+      const win = n(pnl.winrate);
+      const holdHours = n(pnl.avg_holding_period) / 3600;
+      const guarded = Boolean(analysis.guarded);
+      const grade = String(analysis.wallet_grade || "").toUpperCase();
+
+      if (guarded || /高频|秒|sandwich|夹子|固定仓位/.test(text)) {
+        return { name: "猎豹", mode: "cheetah", role: "高速试探 / 风险样本", accent: "#ff1f4b", secondary: "#ffc35a" };
+      }
+      if ((grade === "A" || win >= 0.58) && holdHours >= 6) {
+        return { name: "鹰", mode: "eagle", role: "高空狙击 / 等待确认", accent: "#75e7ff", secondary: "#31f39a" };
+      }
+      if (holdHours >= 48) {
+        return { name: "海龟", mode: "turtle", role: "慢节奏持仓 / 低频耐心", accent: "#31f39a", secondary: "#75e7ff" };
+      }
+      if (buy + sell >= 60) {
+        return { name: "狼", mode: "wolf", role: "集群追踪 / 连续出手", accent: "#ff456b", secondary: "#75e7ff" };
+      }
+      return { name: "赤狐", mode: "fox", role: "灵活伏击 / 轻仓试错", accent: "#ff456b", secondary: "#31f39a" };
+    }
+
+    function drawFacetAnimal(ctx, cx, cy, size, profile, metrics) {
+      const s = size / 100;
+      const accent = profile.accent;
+      const secondary = profile.secondary;
+      const dark = "rgba(12,14,20,.92)";
+      const glow = accent.replace(")", ", .18)").replace("rgb", "rgba");
+
+      ctx.save();
+      ctx.shadowBlur = 24;
+      ctx.shadowColor = accent;
+
+      if (profile.mode === "turtle") {
+        poly(ctx, [[cx, cy - 54*s], [cx + 72*s, cy - 8*s], [cx + 48*s, cy + 54*s], [cx - 48*s, cy + 54*s], [cx - 72*s, cy - 8*s]], "rgba(49,243,154,.22)", accent, 2);
+        poly(ctx, [[cx, cy - 54*s], [cx + 12*s, cy - 8*s], [cx, cy + 54*s], [cx - 12*s, cy - 8*s]], "rgba(117,231,255,.18)", secondary);
+        poly(ctx, [[cx - 72*s, cy - 8*s], [cx - 12*s, cy - 8*s], [cx - 48*s, cy + 54*s]], "rgba(255,31,75,.16)", accent);
+        poly(ctx, [[cx + 72*s, cy - 8*s], [cx + 12*s, cy - 8*s], [cx + 48*s, cy + 54*s]], "rgba(255,255,255,.06)", secondary);
+        poly(ctx, [[cx - 20*s, cy - 82*s], [cx + 20*s, cy - 82*s], [cx + 26*s, cy - 52*s], [cx, cy - 38*s], [cx - 26*s, cy - 52*s]], "rgba(49,243,154,.18)", secondary);
+      } else if (profile.mode === "eagle") {
+        poly(ctx, [[cx - 80*s, cy + 22*s], [cx - 18*s, cy - 62*s], [cx, cy + 26*s]], "rgba(117,231,255,.16)", secondary);
+        poly(ctx, [[cx + 80*s, cy + 22*s], [cx + 18*s, cy - 62*s], [cx, cy + 26*s]], "rgba(255,31,75,.13)", accent);
+        poly(ctx, [[cx - 46*s, cy - 40*s], [cx, cy - 76*s], [cx + 46*s, cy - 40*s], [cx + 34*s, cy + 36*s], [cx, cy + 58*s], [cx - 34*s, cy + 36*s]], dark, accent, 2);
+        poly(ctx, [[cx - 12*s, cy - 6*s], [cx + 32*s, cy + 2*s], [cx - 4*s, cy + 28*s]], "rgba(255,195,90,.85)", "#ffd6de");
+      } else {
+        const earLift = profile.mode === "wolf" ? 76 : 62;
+        poly(ctx, [[cx - 60*s, cy - 20*s], [cx - 40*s, cy - earLift*s], [cx - 18*s, cy - 34*s]], "rgba(255,31,75,.20)", accent);
+        poly(ctx, [[cx + 60*s, cy - 20*s], [cx + 40*s, cy - earLift*s], [cx + 18*s, cy - 34*s]], "rgba(255,31,75,.20)", accent);
+        poly(ctx, [[cx - 56*s, cy - 22*s], [cx, cy - 62*s], [cx + 56*s, cy - 22*s], [cx + 42*s, cy + 38*s], [cx, cy + 66*s], [cx - 42*s, cy + 38*s]], dark, accent, 2);
+        poly(ctx, [[cx - 56*s, cy - 22*s], [cx, cy - 62*s], [cx - 8*s, cy + 4*s], [cx - 42*s, cy + 38*s]], "rgba(255,31,75,.20)", accent);
+        poly(ctx, [[cx + 56*s, cy - 22*s], [cx, cy - 62*s], [cx + 8*s, cy + 4*s], [cx + 42*s, cy + 38*s]], "rgba(117,231,255,.10)", secondary);
+        poly(ctx, [[cx - 22*s, cy + 8*s], [cx, cy + 48*s], [cx + 22*s, cy + 8*s]], profile.mode === "fox" ? "rgba(255,195,90,.24)" : "rgba(255,255,255,.08)", secondary);
+        if (profile.mode === "cheetah") {
+          [[-34, -6], [-20, 22], [28, -3], [36, 24]].forEach(([dx, dy]) => {
+            poly(ctx, [[cx + dx*s, cy + dy*s - 5*s], [cx + (dx + 7)*s, cy + dy*s], [cx + dx*s, cy + dy*s + 5*s], [cx + (dx - 7)*s, cy + dy*s]], "rgba(255,195,90,.70)", "#ffd6de");
+          });
+        }
+      }
+
+      ctx.shadowBlur = 0;
+      const eyeY = cy - 8*s;
+      const eyeColor = metrics.risk > 55 ? "#ff1f4b" : "#31f39a";
+      poly(ctx, [[cx - 26*s, eyeY], [cx - 14*s, eyeY - 5*s], [cx - 7*s, eyeY], [cx - 14*s, eyeY + 5*s]], eyeColor, "rgba(255,255,255,.42)");
+      poly(ctx, [[cx + 26*s, eyeY], [cx + 14*s, eyeY - 5*s], [cx + 7*s, eyeY], [cx + 14*s, eyeY + 5*s]], eyeColor, "rgba(255,255,255,.42)");
+      poly(ctx, [[cx - 8*s, cy + 18*s], [cx, cy + 25*s], [cx + 8*s, cy + 18*s], [cx, cy + 13*s]], "rgba(255,255,255,.70)", "rgba(255,255,255,.30)");
+
+      ctx.strokeStyle = "rgba(255,255,255,.11)";
+      for (let i = 0; i < 5; i += 1) {
+        const angle = -Math.PI / 2 + i * Math.PI * .4;
+        const r = (52 + i * 8) * s;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 8*s);
+        ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+        ctx.stroke();
+      }
+
+      const badge = `${profile.name}型`;
+      const badgeW = Math.max(66, badge.length * 16);
+      roundRect(ctx, cx - badgeW / 2, cy + 82*s, badgeW, 24, 12);
+      ctx.fillStyle = glow;
+      ctx.fill();
+      ctx.strokeStyle = accent;
+      ctx.stroke();
+      ctx.fillStyle = "#f6f7fb";
+      ctx.font = "900 12px Inter, sans-serif";
+      ctx.fillText(badge, cx - badgeW / 2 + 12, cy + 98*s);
+      ctx.restore();
+    }
+
+    function drawFacetBar(ctx, x, baseY, w, h, color, secondary) {
+      const topY = baseY - h;
+      const midX = x + w / 2;
+      poly(ctx, [[x, baseY], [midX, topY - 10], [x + w, baseY], [midX, baseY + 10]], "rgba(255,255,255,.055)", "rgba(255,255,255,.10)");
+      poly(ctx, [[x, baseY], [midX, topY], [midX, baseY - h * .45], [x, baseY - h * .2]], color, "rgba(255,255,255,.18)");
+      poly(ctx, [[x + w, baseY], [midX, topY], [midX, baseY - h * .45], [x + w, baseY - h * .2]], secondary, "rgba(255,255,255,.18)");
+      poly(ctx, [[x, baseY - h * .2], [midX, baseY - h * .45], [x + w, baseY - h * .2], [midX, baseY + 4]], "rgba(255,31,75,.18)", "rgba(255,255,255,.12)");
+    }
+
+    function drawMentorProfileImage(canvas, state) {
+      if (!canvas) return;
+      const latest = state?.latest || {};
+      const raw = latest.raw || {};
+      const analysis = latest.analysis || {};
+      const summary = raw.activity_summary || {};
+      const s7 = raw.stats_7d || {};
+      const s30 = raw.stats_30d || {};
+      const pnl = s30.pnl_stat || s7.pnl_stat || {};
+      const { ctx, width, height } = fitCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, width, height);
+      bg.addColorStop(0, "#050609");
+      bg.addColorStop(.55, "#0c0f15");
+      bg.addColorStop(1, "#190713");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(255,31,75,.08)";
+      for (let x = 18; x < width; x += 36) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 18; y < height; y += 36) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      const wallet = latest.wallet || state?.wallet || "";
+      const grade = analysis.wallet_grade || "UNKNOWN";
+      const guarded = Boolean(analysis.guarded);
+      const profit = n(s30.realized_profit || s7.realized_profit);
+      const pnlPct = n(s30.realized_profit_pnl || s7.realized_profit_pnl);
+      const win = Math.max(0, Math.min(1, n(pnl.winrate)));
+      const holdDays = n(pnl.avg_holding_period) / 86400;
+      const buy = n(summary.buy_count);
+      const sell = n(summary.sell_count);
+      const risk = Math.min(100, (analysis.red_flags || []).length * 11 + (analysis.avoid_rules || []).length * 6 + (guarded ? 22 : 0));
+      const copy = Math.min(100, (analysis.copy_rules || []).length * 12 + (analysis.entry_patterns || []).length * 8);
+      const discipline = Math.max(0, Math.min(100, win * 70 + (profit > 0 ? 20 : 0) - (guarded ? 18 : 0)));
+      const accent = guarded ? "#ff1f4b" : grade === "A" ? "#31f39a" : grade === "B" ? "#ffc35a" : profit >= 0 ? "#31f39a" : "#ffc35a";
+      const animal = walletAnimalProfile(analysis, raw);
+
+      ctx.fillStyle = "rgba(255,31,75,.10)";
+      ctx.shadowBlur = 24;
+      ctx.shadowColor = accent;
+      roundRect(ctx, 14, 14, width - 28, height - 28, 14);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "rgba(255,255,255,.12)";
+      ctx.stroke();
+
+      ctx.fillStyle = "#f6f7fb";
+      ctx.font = "900 20px Inter, sans-serif";
+      ctx.fillText("BSCCO ANIMAL PORTRAIT", 30, 44);
+      ctx.fillStyle = "rgba(255,255,255,.58)";
+      ctx.font = "800 10px Inter, sans-serif";
+      ctx.fillText(`${animal.name} · ${animal.role} · ${short(wallet).toUpperCase()}`, 31, 62);
+
+      const badgeText = guarded ? `${animal.name} RISK` : `${animal.name} ${grade}`;
+      const badgeW = Math.max(92, badgeText.length * 8 + 18);
+      roundRect(ctx, width - badgeW - 28, 28, badgeW, 28, 14);
+      ctx.fillStyle = guarded ? "rgba(255,31,75,.22)" : "rgba(49,243,154,.16)";
+      ctx.fill();
+      ctx.strokeStyle = guarded ? "rgba(255,31,75,.72)" : "rgba(49,243,154,.48)";
+      ctx.stroke();
+      ctx.fillStyle = guarded ? "#ffd6de" : "#c7ffe4";
+      ctx.font = "900 11px Inter, sans-serif";
+      ctx.fillText(badgeText, width - badgeW - 16, 46);
+
+      const avatarX = Math.max(115, width * .22);
+      const avatarY = height * .48;
+      const avatarR = Math.min(78, width * .12);
+      ctx.strokeStyle = "rgba(255,255,255,.10)";
+      for (let i = 1; i <= 3; i += 1) {
+        ctx.beginPath();
+        ctx.arc(avatarX, avatarY, avatarR + i * 18, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      drawFacetAnimal(ctx, avatarX, avatarY, avatarR * 1.72, animal, { risk, copy, discipline, buy, sell });
+
+      const pulse = Math.max(1, buy + sell);
+      for (let i = 0; i < 9; i += 1) {
+        const angle = i / 9 * Math.PI * 2;
+        const rr = avatarR + 28 + (i % 3) * 11;
+        const px = avatarX + Math.cos(angle) * rr;
+        const py = avatarY + Math.sin(angle) * rr;
+        const d = 3.5 + (pulse % 5) * .45;
+        poly(ctx, [[px, py - d], [px + d, py], [px, py + d], [px - d, py]], i % 2 ? animal.secondary : animal.accent, "rgba(255,255,255,.18)");
+        ctx.strokeStyle = "rgba(255,255,255,.13)";
+        ctx.beginPath();
+        ctx.moveTo(avatarX, avatarY);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+      }
+
+      const rightX = width * .43;
+      const tileW = Math.max(112, width * .18);
+      const gap = 10;
+      drawPortraitTile(ctx, rightX, 82, tileW, 58, "REALIZED", `$${compactNum(profit)}`, profit >= 0 ? "#31f39a" : "#ff456b");
+      drawPortraitTile(ctx, rightX + tileW + gap, 82, tileW, 58, "PNL", `${(pnlPct * 100).toFixed(1)}%`, pnlPct >= 0 ? "#31f39a" : "#ff456b");
+      drawPortraitTile(ctx, rightX, 150, tileW, 58, "WINRATE", `${Math.round(win * 100)}%`, win >= .5 ? "#31f39a" : "#ffc35a");
+      drawPortraitTile(ctx, rightX + tileW + gap, 150, tileW, 58, "PULSE", `${buy}/${sell}`, "#ff456b");
+      drawPortraitTile(ctx, rightX, 218, tileW, 58, "HOLD", `${compactNum(holdDays)}d`, "#75e7ff");
+      drawPortraitTile(ctx, rightX + tileW + gap, 218, tileW, 58, "ANIMAL", animal.name, animal.accent);
+
+      drawPortraitBar(ctx, 32, height - 86, width * .27, "COPY SIGNAL", copy, "#31f39a");
+      drawPortraitBar(ctx, width * .37, height - 86, width * .27, "RISK", risk, "#ff1f4b");
+      drawPortraitBar(ctx, width * .69, height - 86, width * .23, "DISCIPLINE", discipline, "#75e7ff");
+
+      const top = Array.isArray(summary.top_symbols) ? summary.top_symbols.slice(0, 4) : [];
+      ctx.font = "800 10px Inter, sans-serif";
+      top.forEach((item, i) => {
+        const text = String(item.symbol || "?").slice(0, 12);
+        const chipX = 32 + i * Math.max(82, width * .12);
+        roundRect(ctx, chipX, height - 38, Math.max(64, text.length * 8 + 18), 22, 11);
+        ctx.fillStyle = "rgba(255,31,75,.16)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,31,75,.32)";
+        ctx.stroke();
+        ctx.fillStyle = "#ffd6de";
+        ctx.fillText(text, chipX + 9, height - 23);
+      });
+
+      const style = `${animal.name}型 · ${String(analysis.style || "等待生成动物画像")}`;
+      ctx.fillStyle = "rgba(255,255,255,.78)";
+      ctx.font = "800 12px Inter, sans-serif";
+      const styleMax = Math.max(16, Math.floor((width - rightX - 32) / 12));
+      ctx.fillText(style.slice(0, styleMax), rightX, 306);
+      ctx.fillStyle = "rgba(255,255,255,.42)";
+      ctx.font = "700 10px Inter, sans-serif";
+      ctx.fillText(new Date().toLocaleString("zh-CN"), rightX, 324);
+    }
+
+    function drawMentorActivityChart(canvas, summary, analysis = {}) {
+      if (!canvas) return;
+      const { ctx, width, height } = fitCanvas(canvas);
+      drawChartBackground(ctx, width, height);
+      const animal = walletAnimalProfile(analysis, { activity_summary: summary || {} });
+      const buy = n(summary.buy_count);
+      const sell = n(summary.sell_count);
+      const maxCount = Math.max(1, buy, sell);
+      const bars = [
+        { label: "HUNT", value: buy, color: animal.secondary },
+        { label: "EXIT", value: sell, color: animal.accent },
+      ];
+      const baseY = height - 28;
+      const barW = Math.max(26, width / 7);
+      bars.forEach((bar, i) => {
+        const x = width * (0.25 + i * 0.24);
+        const h = Math.max(8, (height - 58) * (bar.value / maxCount));
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = bar.color;
+        drawFacetBar(ctx, x, baseY, barW, h, bar.color, i === 0 ? "rgba(49,243,154,.34)" : "rgba(255,31,75,.34)");
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#f6f7fb";
+        ctx.font = "800 12px Inter, sans-serif";
+        ctx.fillText(bar.label, x, baseY + 16);
+        ctx.fillText(String(bar.value), x, Math.max(14, baseY - h - 8));
+      });
+      ctx.fillStyle = animal.accent;
+      ctx.font = "900 13px Inter, sans-serif";
+      ctx.fillText(`${animal.name}节奏`, 12, 22);
+      const top = Array.isArray(summary.top_symbols) ? summary.top_symbols.slice(0, 3) : [];
+      const startX = width * .64;
+      ctx.font = "700 11px Inter, sans-serif";
+      top.forEach((item, i) => {
+        const volume = n(item.buy_usd) + n(item.sell_usd);
+        const y = 28 + i * 35;
+        ctx.fillStyle = i === 0 ? animal.accent : "rgba(255,255,255,.76)";
+        ctx.fillText(String(item.symbol || "?").slice(0, 9), startX, y);
+        const ww = Math.max(8, Math.min(width * .25, volume / Math.max(1, n(top[0]?.buy_usd) + n(top[0]?.sell_usd)) * width * .25));
+        poly(ctx, [[startX, y + 12], [startX + ww / 2, y + 6], [startX + ww, y + 12], [startX + ww / 2, y + 18]], animal.accent, "rgba(255,255,255,.12)");
+      });
+    }
+
+    function drawMentorProfitChart(canvas, raw, analysis = {}) {
+      if (!canvas) return;
+      const { ctx, width, height } = fitCanvas(canvas);
+      drawChartBackground(ctx, width, height);
+      const animal = walletAnimalProfile(analysis, raw || {});
+      const s7 = raw.stats_7d || {};
+      const s30 = raw.stats_30d || {};
+      const profits = [
+        { label: "7D", value: n(s7.realized_profit), pnl: n(s7.realized_profit_pnl) },
+        { label: "30D", value: n(s30.realized_profit), pnl: n(s30.realized_profit_pnl) },
+      ];
+      const maxAbs = Math.max(1, ...profits.map((p) => Math.abs(p.value)));
+      const zeroY = Math.round(height * .56);
+      ctx.strokeStyle = "rgba(255,255,255,.18)";
+      ctx.beginPath();
+      ctx.moveTo(12, zeroY);
+      ctx.lineTo(width - 12, zeroY);
+      ctx.stroke();
+      profits.forEach((p, i) => {
+        const x = width * (0.22 + i * 0.25);
+        const h = Math.max(6, Math.abs(p.value) / maxAbs * (height * .42));
+        const color = p.value >= 0 ? "#31f39a" : "#ff1f4b";
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = color;
+        if (p.value >= 0) {
+          drawFacetBar(ctx, x, zeroY, Math.max(28, width * .12), h, color, animal.secondary);
+        } else {
+          drawFacetBar(ctx, x, zeroY + h, Math.max(28, width * .12), h, color, "rgba(255,31,75,.30)");
+        }
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#f6f7fb";
+        ctx.font = "800 12px Inter, sans-serif";
+        ctx.fillText(p.label, x, height - 12);
+        ctx.font = "700 11px Inter, sans-serif";
+        ctx.fillText(`$${compactNum(p.value)}`, x, p.value >= 0 ? zeroY - h - 12 : zeroY + h + 18);
+      });
+      ctx.fillStyle = animal.accent;
+      ctx.font = "900 13px Inter, sans-serif";
+      ctx.fillText(`${animal.name}猎食曲线`, 12, 22);
+      const pnl = s30.pnl_stat || s7.pnl_stat || {};
+      const win = Math.max(0, Math.min(1, n(pnl.winrate)));
+      const holdH = n(pnl.avg_holding_period) / 3600;
+      const cx = width * .78;
+      const cy = height * .43;
+      const r = Math.min(40, width * .15);
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(255,255,255,.14)";
+      ctx.lineWidth = 9;
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.strokeStyle = win >= .5 ? "#31f39a" : "#ff1f4b";
+      ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * win);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#f6f7fb";
+      ctx.font = "900 15px Inter, sans-serif";
+      ctx.fillText(`${Math.round(win * 100)}%`, cx - 17, cy + 5);
+      ctx.font = "700 10px Inter, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.72)";
+      ctx.fillText(`hold ${compactNum(holdH)}h`, cx - 31, cy + r + 20);
+    }
+
+    function drawMentorRuleChart(canvas, analysis) {
+      if (!canvas) return;
+      const { ctx, width, height } = fitCanvas(canvas);
+      drawChartBackground(ctx, width, height);
+      const animal = walletAnimalProfile(analysis || {}, {});
+      const metrics = [
+        ["入场", (analysis.entry_patterns || []).length + (analysis.copy_rules || []).length],
+        ["出场", (analysis.exit_patterns || []).length],
+        ["仓位", (analysis.sizing_rules || []).length],
+        ["筛选", (analysis.token_filters || []).length],
+        ["回避", (analysis.avoid_rules || []).length],
+        ["红旗", (analysis.red_flags || []).length + (analysis.guarded ? 2 : 0)],
+      ].map(([label, value]) => ({ label, value: Math.min(1, n(value) / 8) }));
+      const cx = width / 2;
+      const cy = height / 2 + 4;
+      const r = Math.min(width, height) * .34;
+      ctx.strokeStyle = "rgba(255,255,255,.12)";
+      for (let ring = 1; ring <= 3; ring += 1) {
+        ctx.beginPath();
+        metrics.forEach((m, i) => {
+          const angle = -Math.PI / 2 + i / metrics.length * Math.PI * 2;
+          const rr = r * ring / 3;
+          const x = cx + Math.cos(angle) * rr;
+          const y = cy + Math.sin(angle) * rr;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      metrics.forEach((m, i) => {
+        const angle = -Math.PI / 2 + i / metrics.length * Math.PI * 2;
+        const x = cx + Math.cos(angle) * r * m.value;
+        const y = cy + Math.sin(angle) * r * m.value;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "rgba(255,31,75,.24)";
+      ctx.strokeStyle = animal.accent;
+      ctx.lineWidth = 2;
+      ctx.fill();
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      poly(ctx, [[cx, cy - 13], [cx + 13, cy], [cx, cy + 13], [cx - 13, cy]], animal.secondary, "rgba(255,255,255,.30)", 1.5);
+      ctx.fillStyle = animal.accent;
+      ctx.font = "900 13px Inter, sans-serif";
+      ctx.fillText(`${animal.name}棱镜`, 12, 22);
+      ctx.font = "800 10px Inter, sans-serif";
+      metrics.forEach((m, i) => {
+        const angle = -Math.PI / 2 + i / metrics.length * Math.PI * 2;
+        const x = cx + Math.cos(angle) * (r + 24);
+        const y = cy + Math.sin(angle) * (r + 18);
+        ctx.fillStyle = i >= 4 ? "#ff9bad" : "rgba(255,255,255,.82)";
+        ctx.fillText(m.label, x - 12, y + 3);
+      });
+    }
+
+    function drawMentorCharts(state) {
+      mentorChartState = state || mentorChartState;
+      const latest = mentorChartState?.latest || {};
+      const raw = latest.raw || {};
+      const analysis = latest.analysis || {};
+      drawMentorProfileImage($("#mentor-profile-image"), mentorChartState);
+      drawMentorActivityChart($("#mentor-activity-chart"), raw.activity_summary || {}, analysis);
+      drawMentorProfitChart($("#mentor-profit-chart"), raw, analysis);
+      drawMentorRuleChart($("#mentor-rule-chart"), analysis);
+    }
+
+    function exportMentorImage() {
+      const canvas = $("#mentor-profile-image");
+      if (!canvas) return;
+      drawMentorCharts();
+      const link = document.createElement("a");
+      const wallet = mentorChartState?.latest?.wallet || mentorChartState?.wallet || "mentor";
+      link.download = `bscco-data-portrait-${short(wallet).replaceAll(".", "")}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function renderMentor(data) {
+      const state = data || {};
+      const latest = state.latest || {};
+      const analysis = latest.analysis || {};
+      const raw = latest.raw || {};
+      const summary = raw.activity_summary || analysis.activity_summary || {};
+      const wallet = latest.wallet || state.wallet || "";
+      const input = $("#mentor-wallet");
+      if (input && document.activeElement !== input) input.value = wallet;
+
+      const ok = Boolean(latest.ok);
+      const gmgnReady = state.gmgn_ready ?? latest.gmgn_ready;
+      const deepseekReady = state.deepseek_ready ?? latest.deepseek_ready;
+      const aiProvider = state.ai_provider || latest.ai_provider || "ZAI";
+      $("#mentor-wallet-label").textContent = short(wallet);
+      $("#mentor-updated").textContent = latest.updated_at ? `更新 ${fmtTime(latest.updated_at)}` : "等待深挖";
+      $("#mentor-status").textContent = ok ? (analysis.wallet_grade || "READY") : (latest.error ? "ERROR" : "WAIT");
+      $("#mentor-status").className = gradeClass(ok ? analysis.wallet_grade : latest.error ? "ERROR" : "");
+      $("#mentor-ready").textContent = `GMGN ${gmgnReady ? "OK" : "--"} · ${aiProvider} ${deepseekReady ? "OK" : "--"}`;
+      $("#mentor-style").textContent = analysis.style || "--";
+      $("#mentor-confidence").textContent = `confidence ${analysis.confidence || "--"}`;
+      $("#mentor-activity").textContent = `${summary.buy_count ?? 0} buy / ${summary.sell_count ?? 0} sell`;
+      const topSymbols = Array.isArray(summary.top_symbols) ? summary.top_symbols : [];
+      $("#mentor-top-symbols").textContent = topSymbols.length
+        ? topSymbols.slice(0, 4).map((x) => `${x.symbol || "?"}:${Math.round((x.buy_usd || 0) + (x.sell_usd || 0))}`).join(" · ")
+        : "等待 activity";
+      setMsg("#mentor-instruction", analysis.ai_instruction || latest.error || "AI 会把这个地址提炼成可执行的交易规则。");
+      drawMentorCharts(state);
+      $("#mentor-entry").innerHTML = renderLineList([...(analysis.entry_patterns || []), ...(analysis.copy_rules || [])], 10);
+      $("#mentor-exit").innerHTML = renderLineList([...(analysis.exit_patterns || []), ...(analysis.sizing_rules || [])], 10);
+      $("#mentor-filters").innerHTML = renderLineList(analysis.token_filters || [], 8);
+      $("#mentor-avoid").innerHTML = renderLineList([...(analysis.avoid_rules || []), ...(analysis.red_flags || [])], 10);
+
+      const snaps = Array.isArray(state.snapshots) ? state.snapshots : [];
+      if (!snaps.length) {
+        $("#mentor-history").innerHTML = '<div class="empty">还没有导师钱包画像；点击“深挖”。</div>';
+        return;
+      }
+      $("#mentor-history").innerHTML = snaps.slice(0, 5).map((snap) => {
+        const a = snap.analysis || {};
+        const s = snap.raw?.activity_summary || a.activity_summary || {};
+        return `
+          <div class="row">
+            <div>
+              <div class="name"><span class="token-dot"></span><span>${escapeHtml(short(snap.wallet))}</span><span class="pill ${gradeClass(a.wallet_grade)}">${escapeHtml(a.wallet_grade || "unknown")}</span><span class="pill">${escapeHtml(a.confidence || "--")}</span></div>
+              <div class="meta">${escapeHtml(a.style || snap.error || "--")}</div>
+              <div class="meta hot">活动 ${escapeHtml(s.buy_count ?? 0)} buy / ${escapeHtml(s.sell_count ?? 0)} sell · ${escapeHtml(fmtTime(snap.updated_at))}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadSettings() {
+      try {
+        const r = await api("/api/settings");
+        const d = r.data || {};
+        const ready = d.cobo_configured && d.deepseek_configured;
+        $("#stat-runtime").textContent = ready ? "READY" : "CHECK";
+        $("#stat-runtime").className = `stat-value ${ready ? "ok" : "warn"}`;
+        $("#stat-ai").textContent = `caw ${d.cobo_configured ? "OK" : "--"} · ${d.ai_provider || "AI"} ${d.deepseek_configured ? "OK" : "--"}`;
+      } catch (e) {
+        $("#stat-ai").textContent = e.message;
+      }
+    }
+
+    async function loadWallet() {
+      setBusy("wallet", true);
+      $("#stat-wallet").textContent = "读取钱包余额...";
+      try {
+        const r = await api("/api/wallet");
+        const wallet = r.data || {};
+        $("#stat-balance").textContent = wallet.bnb_fmt ? `${wallet.bnb_fmt} BNB` : wallet.bnb != null ? `${wallet.bnb} BNB` : "--";
+        $("#stat-wallet").textContent = wallet.address_fmt || wallet.address || wallet.message || wallet.error || "钱包未读到";
+      } catch (e) {
+        $("#stat-balance").textContent = "--";
+        $("#stat-wallet").textContent = e.message;
+      } finally {
+        setBusy("wallet", false);
+      }
+    }
+
+    async function loadPact() {
+      try {
+        const r = await api("/api/pact");
+        const status = r.data?.status || "unknown";
+        const scoped = r.data?.scoped_key ? " · scoped" : "";
+        $("#stat-pact").textContent = `Cobo Pact ${status}${scoped}`;
+        $("#trade-pact").textContent = `${status}${scoped}`;
+      } catch {
+        $("#stat-pact").textContent = "Cobo Pact unknown";
+        $("#trade-pact").textContent = "unknown";
+      }
+    }
+
+    async function loadPools() {
+      setBusy("pools", true);
+      $("#new-status").textContent = "LOAD";
+      try {
+        const r = await api("/api/pools");
+        renderPools(r.data || []);
+        $("#new-status").textContent = `OK ${r.data?.length || 0}`;
+      } catch (e) {
+        $("#new-status").textContent = "ERR";
+        $("#new-list").innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`;
+      } finally {
+        setBusy("pools", false);
+      }
+    }
+
+    async function scanNow() {
+      setBusy("scan", true);
+      $("#new-status").textContent = "SCAN";
+      try {
+        const r = await api("/api/scan-now", { method: "POST" });
+        renderPools(r.data || []);
+        $("#new-status").textContent = `NEW ${r.count || 0}`;
+      } catch (e) {
+        $("#new-status").textContent = "ERR";
+        $("#new-list").innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`;
+      } finally {
+        setBusy("scan", false);
+      }
+    }
+
+    async function loadPositions() {
+      setBusy("positions", true);
+      try {
+        const r = await api("/api/portfolio");
+        renderPositions(r.data?.positions || []);
+        if (r.data?.wallet) {
+          const wallet = r.data.wallet;
+          $("#stat-balance").textContent = `${wallet.bnb_fmt || wallet.bnb || "--"} BNB`;
+          $("#stat-wallet").textContent = wallet.address_fmt || wallet.address || wallet.message || "";
+        }
+        if (r.data?.pact) {
+          const scoped = r.data.pact.scoped_key ? " · scoped" : "";
+          $("#stat-pact").textContent = `Cobo Pact ${r.data.pact.status}${scoped}`;
+          $("#trade-pact").textContent = `${r.data.pact.status || "--"}${scoped}`;
+        }
+      } catch (e) {
+        $("#position-list").innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`;
+      } finally {
+        setBusy("positions", false);
+      }
+    }
+
+    function schedulePositionSync(rounds = 8, delay = 5000) {
+      if (positionRefreshTimer) clearTimeout(positionRefreshTimer);
+      let left = rounds;
+      const tick = async () => {
+        if (!left) return;
+        left -= 1;
+        await Promise.allSettled([loadWallet(), loadPositions()]);
+        if (left > 0) {
+          positionRefreshTimer = setTimeout(tick, delay);
+        }
+      };
+      positionRefreshTimer = setTimeout(tick, delay);
+    }
+
+    async function scoreToken() {
+      const addr = $("#trade-address").value.trim();
+      if (!validAddress(addr)) {
+        setMsg("#trade-msg", "请输入有效 CA");
+        return;
+      }
+      setBusy("score", true);
+      $("#score-box").innerHTML = '<div class="empty">评分中...</div>';
+      try {
+        const r = await api(`/api/token/${addr}`);
+        renderScore(r.data);
+        setMsg("#trade-msg", "");
+      } catch (e) {
+        $("#score-box").innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`;
+      } finally {
+        setBusy("score", false);
+      }
+    }
+
+    async function buy(endpoint, label) {
+      const address = $("#trade-address").value.trim();
+      const amount = Number.parseFloat($("#trade-amount").value || "0");
+      if (!validAddress(address) || amount <= 0) {
+        setMsg("#trade-msg", "请填写有效 CA 和 BNB 数量");
+        return;
+      }
+      setBusy("buy", true);
+      setMsg("#trade-msg", `${label}提交中；弹出后去 Cobo App 手机确认。`);
+      try {
+        const r = await api(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, amount }),
+        });
+        setMsg("#trade-msg", r.message || (r.ok ? `${label}已提交` : "合约调用失败"));
+        await Promise.allSettled([loadWallet(), loadPositions(), loadPools()]);
+      } catch (e) {
+        setMsg("#trade-msg", e.message);
+      } finally {
+        setBusy("buy", false);
+      }
+    }
+
+    async function sell(address, sellPct) {
+      setBusy("positions", true);
+      setMsg("#sell-msg", `提交卖出 ${sellPct}%...`);
+      try {
+        const r = await api("/api/sell", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, sell_pct: sellPct }),
+        });
+        setMsg("#sell-msg", r.message || (r.ok ? "已提交卖出" : "卖出失败"));
+        await loadPositions();
+        if (r.ok && r.action === "sell") {
+          schedulePositionSync(10, 5000);
+          setMsg("#sell-msg", `${r.message || "已提交卖出"}\n确认后会自动同步链上余额并清空已卖出仓位。`);
+        }
+      } catch (e) {
+        setMsg("#sell-msg", e.message);
+      } finally {
+        setBusy("positions", false);
+      }
+    }
+
+    async function aiTest() {
+      setBusy("ai", true);
+      setMsg("#ai-msg", "AI 正在扫描最新 four.meme 并做一次决策...");
+      try {
+        const r = await api("/api/ai-test-once", { method: "POST" });
+        const d = r.decision || {};
+        setMsg("#ai-msg", `${r.message || "完成"}\n动作: ${d.action || "--"}\n置信度: ${d.confidence || "--"}\n本笔: ${d.amount_bnb ?? "--"} BNB\n理由: ${d.reason || "--"}`);
+        await loadAiState();
+      } catch (e) {
+        setMsg("#ai-msg", e.message);
+      } finally {
+        setBusy("ai", false);
+      }
+    }
+
+    async function setAiEnabled(enabled) {
+      setBusy("aiControl", true);
+      setMsg("#ai-msg", enabled ? "正在启动 AI 机器人..." : "正在停止 AI 机器人...");
+      try {
+        const r = await api("/api/ai-control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled, auto_trade: true }),
+        });
+        renderAiState(r.data);
+        setMsg("#ai-msg", enabled ? "AI 机器人已启动，后台会周期性扫描、决策和学习。" : "AI 机器人已停止。");
+        await loadLearning();
+      } catch (e) {
+        setMsg("#ai-msg", e.message);
+      } finally {
+        setBusy("aiControl", false);
+      }
+    }
+
+    async function toggleAi() {
+      try {
+        const r = await api("/api/ai-trader");
+        await setAiEnabled(!r.data?.enabled);
+      } catch (e) {
+        setMsg("#ai-msg", e.message);
+      }
+    }
+
+    async function runAiCycle() {
+      setBusy("aiControl", true);
+      setMsg("#ai-msg", "AI 正在运行一整轮：扫描、决策、学习...");
+      try {
+        const r = await api("/api/ai-cycle", { method: "POST" });
+        const d = r.decision || {};
+        setMsg("#ai-msg", `${r.ok ? "一轮完成" : r.message || "未运行"}\n决策数: ${d.count ?? d.decisions?.length ?? 0}\n${d.reason || ""}`);
+        if (r.data) renderAiState(r.data);
+        await loadLearning();
+        await Promise.allSettled([loadWallet(), loadPositions(), loadPools()]);
+      } catch (e) {
+        setMsg("#ai-msg", e.message);
+      } finally {
+        setBusy("aiControl", false);
+      }
+    }
+
+    async function loadAiState() {
+      try {
+        const r = await api("/api/ai-trader");
+        renderAiState(r.data);
+      } catch (e) {
+        $("#ai-list").innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function loadLearning() {
+      setBusy("learning", true);
+      try {
+        const r = await api("/api/learning");
+        renderLearning(r.data);
+        if (r.data?.mentor) renderMentor(r.data.mentor);
+        if (r.data?.gmgn_learning) renderGmgnLearning(r.data.gmgn_learning);
+        if (r.data?.ai) renderAiState(r.data.ai);
+      } catch (e) {
+        $("#learning-trades").innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`;
+      } finally {
+        setBusy("learning", false);
+      }
+    }
+
+    async function loadGmgnLearning() {
+      setBusy("gmgnLearning", true);
+      try {
+        const r = await api("/api/gmgn-learning");
+        renderGmgnLearning(r.data);
+      } catch (e) {
+        setMsg("#gmgn-learning-msg", e.message);
+      } finally {
+        setBusy("gmgnLearning", false);
+      }
+    }
+
+    function getGmgnLearnLimit() {
+      const raw = Number.parseInt($("#gmgn-learning-limit")?.value || "10", 10);
+      if (!Number.isFinite(raw)) return 10;
+      return Math.max(1, Math.min(30, raw));
+    }
+
+    async function setGmgnLearningEnabled(enabled) {
+      const limit = getGmgnLearnLimit();
+      setBusy("gmgnLearning", true);
+      setMsg("#gmgn-learning-msg", enabled ? "正在启动 GMGN 自动学习..." : "正在停止 GMGN 自动学习...");
+      try {
+        const r = await api("/api/gmgn-learning/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled, limit, cycle_interval: 1800 }),
+        });
+        renderGmgnLearning(r.data);
+      } catch (e) {
+        setMsg("#gmgn-learning-msg", e.message);
+      } finally {
+        setBusy("gmgnLearning", false);
+      }
+    }
+
+    async function toggleGmgnLearning() {
+      try {
+        const r = await api("/api/gmgn-learning");
+        await setGmgnLearningEnabled(!r.data?.enabled);
+      } catch (e) {
+        setMsg("#gmgn-learning-msg", e.message);
+      }
+    }
+
+    async function detectGmgnLearning() {
+      setBusy("gmgnLearning", true);
+      setMsg("#gmgn-learning-msg", "正在检测 GMGN 排行/内盘/聪明钱候选总数...");
+      try {
+        const r = await api("/api/gmgn-learning/detect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ limit: getGmgnLearnLimit(), chain: "bsc", force: true }),
+        });
+        renderGmgnLearning(r.data);
+      } catch (e) {
+        setMsg("#gmgn-learning-msg", e.message);
+      } finally {
+        setBusy("gmgnLearning", false);
+      }
+    }
+
+    async function runGmgnLearning() {
+      const limit = getGmgnLearnLimit();
+      setBusy("gmgnLearning", true);
+      setMsg("#gmgn-learning-msg", `正在批量学习：先检测候选总数，再自动深挖 ${limit} 个未学习钱包并写入本地...`);
+      try {
+        const r = await api("/api/gmgn-learning/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ limit, chain: "bsc", force: true }),
+        });
+        renderGmgnLearning(r.data);
+        await Promise.allSettled([loadLearning(), loadMentor()]);
+      } catch (e) {
+        setMsg("#gmgn-learning-msg", e.message);
+      } finally {
+        setBusy("gmgnLearning", false);
+      }
+    }
+
+    async function deepDiveGmgnCandidate(wallet) {
+      if (!validAddress(wallet)) {
+        setMsg("#gmgn-learning-msg", "候选钱包地址无效");
+        return;
+      }
+      setBusy("gmgnLearning", true);
+      setMsg("#gmgn-learning-msg", `正在直接深挖 GMGN 候选钱包 ${short(wallet)}...`);
+      try {
+        const r = await api("/api/gmgn-learning/deep-dive", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet, chain: "bsc" }),
+        });
+        renderGmgnLearning(r.data);
+        await Promise.allSettled([loadLearning(), loadMentor()]);
+      } catch (e) {
+        setMsg("#gmgn-learning-msg", e.message);
+      } finally {
+        setBusy("gmgnLearning", false);
+      }
+    }
+
+    async function loadMentor() {
+      setBusy("mentor", true);
+      try {
+        const r = await api("/api/mentor");
+        renderMentor(r.data);
+      } catch (e) {
+        setMsg("#mentor-instruction", e.message);
+      } finally {
+        setBusy("mentor", false);
+      }
+    }
+
+    async function deepDiveMentor() {
+      const wallet = $("#mentor-wallet").value.trim();
+      if (!validAddress(wallet)) {
+        setMsg("#mentor-instruction", "请输入有效导师钱包地址");
+        return;
+      }
+      setBusy("mentor", true);
+      setMsg("#mentor-instruction", "正在深挖：GMGN 拉交易画像，AI 提炼规则...");
+      try {
+        const r = await api("/api/mentor/deep-dive", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet, chain: "bsc" }),
+        });
+        renderMentor(r.data);
+        await loadLearning();
+      } catch (e) {
+        setMsg("#mentor-instruction", e.message);
+      } finally {
+        setBusy("mentor", false);
+      }
+    }
+
+    async function refreshAll() {
+      setBusy("all", true);
+      await Promise.allSettled([loadWallet(), loadSettings(), loadPact(), loadPools(), loadPositions(), loadAiState(), loadLearning(), loadMentor(), loadGmgnLearning()]);
+      setBusy("all", false);
+    }
+
+    function setupEvents() {
+      $("#refresh-wallet").addEventListener("click", loadWallet);
+      $("#refresh-all").addEventListener("click", refreshAll);
+      $("#load-pools").addEventListener("click", loadPools);
+      $("#scan-now").addEventListener("click", scanNow);
+      $("#refresh-positions").addEventListener("click", loadPositions);
+      $("#score-token").addEventListener("click", scoreToken);
+      $("#manual-buy").addEventListener("click", () => buy("/api/buy", "买入"));
+      $("#force-buy").addEventListener("click", () => buy("/api/force-buy", "强制测试买入"));
+      $("#ai-test").addEventListener("click", aiTest);
+      $("#ai-test-side").addEventListener("click", aiTest);
+      $("#ai-toggle-top").addEventListener("click", toggleAi);
+      $("#ai-toggle-side").addEventListener("click", toggleAi);
+      $("#ai-cycle").addEventListener("click", runAiCycle);
+      $("#refresh-learning").addEventListener("click", loadLearning);
+      $("#refresh-gmgn-learning").addEventListener("click", loadGmgnLearning);
+      $("#gmgn-learning-toggle").addEventListener("click", toggleGmgnLearning);
+      $("#gmgn-learning-run").addEventListener("click", runGmgnLearning);
+      $("#gmgn-learning-detect").addEventListener("click", detectGmgnLearning);
+      $("#refresh-mentor").addEventListener("click", loadMentor);
+      $("#mentor-deep-dive").addEventListener("click", deepDiveMentor);
+      $("#export-mentor-image").addEventListener("click", exportMentorImage);
+
+      document.addEventListener("click", (event) => {
+        const fill = event.target.closest(".js-fill");
+        if (fill) fillTrade(fill.dataset.address, "0.001");
+        const buyFill = event.target.closest(".js-buy-fill");
+        if (buyFill) fillTrade(buyFill.dataset.address, "0.001");
+        const gmgnDive = event.target.closest(".js-gmgn-candidate-dive");
+        if (gmgnDive) {
+          deepDiveGmgnCandidate(gmgnDive.dataset.wallet || "");
+          return;
+        }
+        const mentorFill = event.target.closest(".js-mentor-fill");
+        if (mentorFill) {
+          const wallet = mentorFill.dataset.wallet || "";
+          $("#mentor-wallet").value = wallet;
+          setMsg("#mentor-instruction", `已填入 ${short(wallet)}，可以点击“深挖”。`);
+        }
+        const sellButton = event.target.closest(".js-sell");
+        if (sellButton) sell(sellButton.dataset.address, Number(sellButton.dataset.pct || 100));
+      });
+    }
+
+    function fitCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = Math.max(1, window.devicePixelRatio || 1);
+      const w = Math.max(1, Math.floor(rect.width * scale));
+      const h = Math.max(1, Math.floor(rect.height * scale));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawRadarFrame(time = 0) {
+      const canvas = $("#radar-canvas");
+      if (!canvas) return;
+      const { ctx, width, height } = fitCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(255,31,75,.16)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 42) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 42) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      const points = poolsCache.slice(0, 20).map((pool, i) => {
+        const score = Number(pool.score || 35 + (i % 8) * 7);
+        const angle = (i / Math.max(1, Math.min(20, poolsCache.length))) * Math.PI * 2 + time * .00028;
+        const radius = 48 + (score / 100) * Math.min(width, height) * .28 + (i % 3) * 18;
+        return {
+          x: width / 2 + Math.cos(angle) * radius,
+          y: height / 2 + Math.sin(angle * 1.25) * radius * .56,
+          score,
+        };
+      });
+
+      ctx.save();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = "rgba(255,31,75,.72)";
+      ctx.strokeStyle = "rgba(255,31,75,.76)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+
+      points.forEach((p) => {
+        ctx.beginPath();
+        ctx.fillStyle = p.score >= 80 ? "#ff1f4b" : "rgba(255,69,107,.82)";
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = "#ff1f4b";
+        ctx.arc(p.x, p.y, p.score >= 80 ? 4.5 : 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+
+      const sweep = (time * .00055) % (Math.PI * 2);
+      const cx = width / 2;
+      const cy = height / 2;
+      const sweepR = Math.min(width, height) * .48;
+      ctx.strokeStyle = "rgba(255,31,75,.40)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(sweep) * sweepR, cy + Math.sin(sweep) * sweepR);
+      ctx.stroke();
+    }
+
+    function drawBars() {
+      const canvas = $("#bar-canvas");
+      if (!canvas) return;
+      const { ctx, width, height } = fitCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+      const source = poolsCache.length ? poolsCache.slice(0, 18) : Array.from({ length: 18 }, (_, i) => ({ score: 20 + (i * 13) % 70 }));
+      const gap = 5;
+      const barW = Math.max(5, (width - gap * (source.length - 1)) / source.length);
+      source.forEach((p, i) => {
+        const score = Number(p.score || 35 + (i % 5) * 10);
+        const h = Math.max(10, (height - 18) * Math.min(1, score / 100));
+        const x = i * (barW + gap);
+        const y = height - h;
+        const grad = ctx.createLinearGradient(0, y, 0, height);
+        grad.addColorStop(0, "#ff1f4b");
+        grad.addColorStop(1, "rgba(255,31,75,.22)");
+        ctx.fillStyle = grad;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "rgba(255,31,75,.60)";
+        ctx.fillRect(x, y, barW, h);
+      });
+      ctx.shadowBlur = 0;
+    }
+
+    function animate(time) {
+      drawRadarFrame(time);
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", () => {
+      drawBars();
+      drawMentorCharts();
+    });
+    setupEvents();
+    refreshAll();
+    requestAnimationFrame(animate);
+    setInterval(() => {
+      loadSettings();
+      loadPact();
+    }, 15000);
+    setInterval(() => {
+      if (!busy.has("positions")) loadPositions();
+    }, 20000);
+    setInterval(() => {
+      if (!busy.has("gmgnLearning")) loadGmgnLearning();
+    }, 30000);
+  </script>
+</body>
+</html>
