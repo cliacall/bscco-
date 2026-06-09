@@ -10,27 +10,27 @@ BSCCO 机器人是一套面向 BNB Smart Chain 一级市场的 AI 交易 Demo。
 
 第一张：主界面，展示余额、新创建候选、交易终端、Pact 状态和新币雷达。
 
-![主界面](docs/screenshots/1.png)
+![主界面](zai/docs/screenshots/1.png)
 
 第二张：启动 AI 机器人与强制测试决策，展示自动决策、手动触发和最近动作。
 
-![启动功能](docs/screenshots/2.png)
+![启动功能](zai/docs/screenshots/2.png)
 
 第三张：AI 学习板块，展示规则学习、回避规则和交易复盘沉淀。
 
-![学习板块](docs/screenshots/3.png)
+![学习板块](zai/docs/screenshots/3.png)
 
 第四张：GMGN 聪明钱自动学习，支持填写批量学习数量，从排行、内盘、聪明钱候选里批量深挖。
 
-![GMGN 自动学习](docs/screenshots/4.png)
+![GMGN 自动学习](zai/docs/screenshots/4.png)
 
 第五张：深挖聪明钱钱包，把单个候选钱包转成可读画像和交易风格。
 
-![聪明钱深挖](docs/screenshots/5.png)
+![聪明钱深挖](zai/docs/screenshots/5.png)
 
 第六张：学习数据转化，把钱包行为拆成入场、出场、风控、仓位和回避规则。
 
-![学习数据转化](docs/screenshots/6.png)
+![学习数据转化](zai/docs/screenshots/6.png)
 
 ## 核心能力
 
