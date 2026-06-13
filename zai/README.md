@@ -18,6 +18,17 @@ bscco 的目标是成为 BSC 链上的“可学习量化 Agent”：
 - **策略持续升级**：每次交易、复盘、深挖都会写入本地学习数据，后续 AI 决策会参考这些记忆。
 - **安全交易闭环**：AI 可以发出交易意图，但 Cobo Pact 和手机确认负责最后执行，避免机器人直接裸奔。
 
+## Demo 视频
+
+视频按下方 Demo 截图顺序讲解：主界面、AI 启动、学习板块、GMGN 自动学习、聪明钱深挖和学习数据转化。
+
+[观看 3 分钟内中文讲解 Demo](docs/demo_video/bscco_demo_zh.mp4)
+
+字幕与旁白稿：
+
+- [中文字幕 SRT](docs/demo_video/bscco_demo_zh.srt)
+- [中文旁白稿](docs/demo_video/bscco_demo_narration.txt)
+
 ## Demo 截图
 
 第一张：主界面，展示余额、新创建候选、交易终端、Pact 状态和新币雷达。
